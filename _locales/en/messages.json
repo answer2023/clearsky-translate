@@ -3,7 +3,7 @@
     "message": "ClearSky Bilingual Translate"
   },
   "extDesc": {
-    "message": "Bilingual or full-page web translation plus dual-language video subtitles. Use DeepSeek, Qwen, OpenAI & other LLMs, or free."
+    "message": "Bilingual or full-page web translation plus dual-language video subtitles. Free out of the box, or plug in your own LLM API."
   },
   "cmdToggle": {
     "message": "Translate / restore this page"

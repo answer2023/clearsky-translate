@@ -7,7 +7,7 @@ SLIDES = [
   ('screenshot-1-bilingual.png', '网页双语对照', '原文、译文上下对照，读外文资料不再来回切换', 'shots/article-bilingual.png'),
   ('screenshot-2-replace.png', '一键切换“仅显示译文”', '整页变中文，链接照常可点；随时切回双语，不重复请求', 'shots/article-replace.png'),
   ('screenshot-3-video.png', '视频双语字幕', '自动生成的字幕先按句断开再翻译，中英两行同步显示', 'shots/video.png'),
-  ('screenshot-4-engine.png', '大模型翻译，或零配置免费用', '支持 DeepSeek、通义千问、Kimi、智谱、OpenAI 等兼容接口', 'shots/options.png'),
+  ('screenshot-4-engine.png', '大模型翻译，或零配置免费用', '可接入你自己的大模型 API，译文更自然、术语更准确', 'shots/options.png'),
 ]
 CSS = '''*{margin:0;box-sizing:border-box}body{width:1280px;height:800px;overflow:hidden;background:#022A99;font-family:"Noto Sans CJK SC",sans-serif;color:#fff;position:relative}
 .bg{position:absolute;right:-160px;top:-160px;width:520px;height:520px;border-radius:50%;background:rgba(251,205,8,.10)}

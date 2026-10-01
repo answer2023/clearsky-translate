@@ -1,5 +1,11 @@
 {
-  "extName": { "message": "ClearSky 双语翻译" },
-  "extDesc": { "message": "网页双语对照/整页替换翻译，视频双语字幕。支持 DeepSeek、通义千问、OpenAI 等大模型，也可零配置使用免费翻译。" },
-  "cmdToggle": { "message": "翻译 / 恢复当前网页" }
+  "extName": {
+    "message": "ClearSky 双语翻译"
+  },
+  "extDesc": {
+    "message": "网页双语对照/整页替换翻译，视频双语字幕。零配置免费使用，也可接入你自己的大模型 API，译文更自然。"
+  },
+  "cmdToggle": {
+    "message": "翻译 / 恢复当前网页"
+  }
 }
