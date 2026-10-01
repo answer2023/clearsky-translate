@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClearSky 双语翻译 · 隐私政策</title>
+<link rel="stylesheet" href="lib/ui.css">
+<style>
+  main { max-width: 760px; margin: 0 auto; padding: 32px 20px 64px; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 28px 0 8px; padding-left: 10px; border-left: 4px solid #FBCD08; }
+  p, li { color: var(--text); }
+  .en { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<main>
+  <h1>ClearSky 双语翻译 隐私政策</h1>
+  <p class="muted">生效日期：2026 年 10 月 1 日 · 开发者：ClearSky</p>
+
+  <h2>一句话说明</h2>
+  <p>本插件没有自己的服务器，不收集、不存储、不出售、不分享你的个人信息或浏览记录。</p>
+
+  <h2>插件会处理哪些数据</h2>
+  <ul>
+    <li><b>待翻译的文字</b>：当你主动翻译网页、或在视频中开启双语字幕时，插件会把页面上需要翻译的段落文字或字幕文字，发送给<b>你选择的翻译服务</b>（谷歌翻译，或你在设置中填写的大模型服务商，例如 DeepSeek、阿里云百炼、OpenAI 等），以获取译文。这些文字只用于翻译，插件开发者看不到。</li>
+    <li><b>你的设置</b>：目标语言、显示方式、字幕样式、"总是翻译"的网站列表，保存在浏览器的 <code>chrome.storage.sync</code> 中，会随你的 Chrome 账号在你自己的设备间同步。</li>
+    <li><b>API Key</b>：只保存在当前浏览器的 <code>chrome.storage.local</code> 中，不会同步，只会在调用你所选服务商接口时作为身份凭证发送给该服务商。</li>
+    <li><b>译文缓存</b>：为节省费用和时间，近期译文临时保存在插件后台内存中，浏览器关闭或插件休眠后自动清除，也可在设置页一键清空。</li>
+  </ul>
+
+  <h2>第三方服务</h2>
+  <p>翻译服务商对你发送的文字如何处理，适用该服务商自己的隐私政策（例如 Google 隐私权政策，或你所使用的大模型服务商的条款）。请勿在不信任的服务商处翻译敏感内容。</p>
+
+  <h2>权限说明</h2>
+  <ul>
+    <li><b>读取和更改网站数据</b>：用于识别网页中的段落并在原文旁插入译文；在 YouTube 页面读取播放器已加载的字幕并显示双语字幕。插件只在你点击翻译、开启"总是翻译此网站"或开启字幕时处理页面内容。</li>
+    <li><b>storage</b>：保存你的设置。</li>
+    <li><b>contextMenus</b>：提供右键菜单"翻译此页面"。</li>
+    <li><b>可选的网站访问权限</b>：仅在你配置大模型接口时，申请访问你填写的那个接口域名。</li>
+  </ul>
+
+  <h2>数据的出售与使用限制</h2>
+  <p>插件不会出售用户数据，不会将用户数据用于与翻译功能无关的用途，不会用于判断信用或发放贷款，也不包含任何广告或分析追踪代码。</p>
+
+  <h2>联系方式</h2>
+  <p>如对本政策有疑问，请联系：【请填写你的联系邮箱】</p>
+
+  <section class="en">
+    <h1>Privacy Policy (English)</h1>
+    <p>ClearSky Bilingual Translate has no server of its own and does not collect, store, sell or share personal data or browsing history.</p>
+    <p>When you translate a page or turn on bilingual subtitles, the text to be translated is sent only to the translation service you choose (Google Translate, or the LLM provider you configure) to obtain the translation. Settings are stored in <code>chrome.storage.sync</code>; your API key is stored only in <code>chrome.storage.local</code> on this device and is sent only to the provider you configured. Recent translations are cached in memory and discarded when the extension's background worker stops.</p>
+    <p>Host access is used solely to insert translations into pages and to render subtitles on YouTube. Optional host permission is requested only for the API endpoint you enter. No ads, analytics or tracking code are included. Contact: 【请填写你的联系邮箱】</p>
+  </section>
+</main>
+</body>
+</html>

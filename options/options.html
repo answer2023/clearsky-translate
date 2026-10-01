@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ClearSky 双语翻译 · 设置</title>
+  <link rel="stylesheet" href="../lib/ui.css">
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <div class="brand">
+        <img src="../icons/icon128.png" alt="">
+        <div><b>ClearSky 双语翻译</b><small>网页双语对照 · 视频双语字幕</small></div>
+      </div>
+      <nav>
+        <a href="#engine">翻译引擎</a><a href="#page">网页翻译</a><a href="#video">视频字幕</a><a href="#about">关于</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- 引擎 -->
+    <section id="engine" class="card">
+      <h2>翻译引擎</h2>
+      <p class="muted">不配置也能用：默认走谷歌免费翻译。填上大模型 API 后，译文更通顺、术语更准确；大模型出错时会自动退回谷歌翻译。</p>
+
+      <div class="seg engine-seg" id="engineSeg">
+        <button data-v="auto">智能（推荐）</button>
+        <button data-v="llm">只用大模型</button>
+        <button data-v="google">只用谷歌免费</button>
+      </div>
+
+      <div class="grid">
+        <label>服务商
+          <select id="provider"></select>
+        </label>
+        <label>模型
+          <input type="text" id="model" placeholder="如 deepseek-chat" spellcheck="false">
+        </label>
+        <label class="full">接口地址（OpenAI 兼容）
+          <input type="url" id="baseUrl" placeholder="https://api.example.com/v1" spellcheck="false">
+        </label>
+        <label class="full">API Key
+          <span class="keybox">
+            <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off" spellcheck="false">
+            <button class="btn" id="showKey" type="button">显示</button>
+          </span>
+          <small class="muted">只保存在这台电脑的浏览器里，不会同步，也不会发给除你所选服务商以外的任何人。</small>
+        </label>
+        <label>创造性（temperature）
+          <input type="number" id="temperature" min="0" max="1.5" step="0.1">
+        </label>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="saveEngine">保存并测试连接</button>
+        <span id="testResult" class="muted"></span>
+      </div>
+    </section>
+
+    <!-- 网页翻译 -->
+    <section id="page" class="card">
+      <h2>网页翻译</h2>
+      <div class="row">
+        <div class="label">目标语言</div>
+        <select id="targetLang"></select>
+      </div>
+      <div class="row">
+        <div class="label">默认显示方式<small>随时可在弹窗或右键菜单里切换</small></div>
+        <div class="seg" id="modeSeg"><button data-v="bilingual">双语对照</button><button data-v="replace">仅显示译文</button></div>
+      </div>
+      <div class="row">
+        <div class="label">双语模式译文样式</div>
+        <select id="style">
+          <option value="plain">简洁（与原文同色）</option>
+          <option value="dim">柔和灰</option>
+          <option value="dashed">虚线下划线</option>
+          <option value="highlight">黄色荧光笔</option>
+          <option value="quote">左侧蓝色竖线</option>
+        </select>
+      </div>
+      <div class="preview" id="stylePreview">
+        <p>Insurance is a means of protection from financial loss in which, in exchange for a fee, a party agrees to compensate another party.<cst-t class="cst-trans cst-block">保险是一种防范经济损失的手段：一方支付费用，另一方承诺对其进行补偿。</cst-t></p>
+      </div>
+      <div class="row">
+        <div class="label">页面右侧悬浮按钮<small>点击即可翻译 / 恢复</small></div>
+        <label class="switch"><input type="checkbox" id="floatBall"><span></span></label>
+      </div>
+      <div class="row column">
+        <div class="label">总是自动翻译的网站<small>在弹窗中打开"总是翻译此网站"即可添加</small></div>
+        <ul id="sites" class="sites"></ul>
+      </div>
+    </section>
+
+    <!-- 视频字幕 -->
+    <section id="video" class="card">
+      <h2>视频双语字幕（YouTube）</h2>
+      <div class="row">
+        <div class="label">启用双语字幕</div>
+        <label class="switch"><input type="checkbox" id="ytEnabled"><span></span></label>
+      </div>
+      <div class="row">
+        <div class="label">打开视频时自动开启字幕<small>每个视频只自动打开一次，你手动关掉后不会再打开</small></div>
+        <label class="switch"><input type="checkbox" id="ytAutoCC"><span></span></label>
+      </div>
+      <div class="row">
+        <div class="label">同时显示原文</div>
+        <label class="switch"><input type="checkbox" id="ytOrig"><span></span></label>
+      </div>
+      <div class="row">
+        <div class="label">字号</div>
+        <span class="range"><input type="range" id="ytScale" min="0.7" max="1.6" step="0.05"><output id="ytScaleOut"></output></span>
+      </div>
+      <div class="row">
+        <div class="label">译文颜色</div>
+        <span class="swatches" id="ytColors"></span>
+      </div>
+      <div class="row">
+        <div class="label">背景不透明度</div>
+        <span class="range"><input type="range" id="ytBg" min="0" max="0.9" step="0.05"><output id="ytBgOut"></output></span>
+      </div>
+      <div class="video-preview" id="ytPreview">
+        <div class="cst-yt-box"><div class="cst-yt-orig">so today we're going to talk about how compound interest works</div><div class="cst-yt-trans">今天我们来聊聊复利是怎么运作的</div></div>
+      </div>
+      <p class="muted small">提示：在 YouTube 播放器里点"CC"打开字幕，插件会自动把它换成双语字幕。自动生成的字幕会先按语义断句再翻译。</p>
+    </section>
+
+    <!-- 关于 -->
+    <section id="about" class="card">
+      <h2>关于与隐私</h2>
+      <p>需要翻译的文字只会发送给你选择的翻译服务（谷歌翻译或你配置的大模型服务商），用于返回译文。本插件没有自己的服务器，不收集、不存储、不出售任何浏览数据。</p>
+      <div class="actions">
+        <a class="btn" href="../privacy.html" target="_blank">隐私政策</a>
+        <button class="btn" id="clearCache">清空译文缓存</button>
+        <span class="muted" id="version"></span>
+      </div>
+    </section>
+  </main>
+  <div class="toast" id="toast"></div>
+  <script src="../lib/defaults.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

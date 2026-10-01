@@ -1,0 +1,5 @@
+{
+  "extName": { "message": "ClearSky 雙語翻譯" },
+  "extDesc": { "message": "網頁雙語對照/整頁替換翻譯，影片雙語字幕。支援 DeepSeek、通義千問、OpenAI 等大模型，也可零設定使用免費翻譯。" },
+  "cmdToggle": { "message": "翻譯 / 還原目前網頁" }
+}

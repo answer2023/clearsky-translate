@@ -1,0 +1,59 @@
+/* ClearSky 双语翻译 — 网页译文样式（克莱因蓝 #022A99 + 靓丽黄 #FBCD08） */
+cst-t.cst-trans {
+  font: inherit;
+  color: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  -webkit-line-clamp: unset;
+}
+cst-t.cst-trans.cst-block {
+  display: block;
+  margin: 0.3em 0 0.15em;
+  line-height: 1.6;
+}
+cst-t.cst-trans.cst-inline {
+  display: inline;
+  margin-left: 0.4em;
+}
+cst-t.cst-trans.cst-heading { line-height: 1.35; }
+
+/* —— 译文风格（双语模式） —— */
+html[data-cst-style='plain']:not(.cst-replace) cst-t.cst-trans { opacity: 0.92; }
+html[data-cst-style='dim']:not(.cst-replace) cst-t.cst-trans { color: #6b7080; }
+html[data-cst-style='dashed']:not(.cst-replace) cst-t.cst-trans {
+  text-decoration: underline dashed rgba(2, 42, 153, 0.55);
+  text-underline-offset: 0.28em;
+  text-decoration-thickness: 1px;
+}
+html[data-cst-style='highlight']:not(.cst-replace) cst-t.cst-trans {
+  background: rgba(251, 205, 8, 0.28);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  border-radius: 3px;
+  padding: 0 0.15em;
+}
+html[data-cst-style='quote']:not(.cst-replace) cst-t.cst-trans.cst-block {
+  border-left: 3px solid #022a99;
+  padding-left: 0.7em;
+  opacity: 0.92;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-cst-style='dim']:not(.cst-replace) cst-t.cst-trans { color: #a3a8b8; }
+  html[data-cst-style='dashed']:not(.cst-replace) cst-t.cst-trans { text-decoration-color: rgba(251, 205, 8, 0.6); }
+  html[data-cst-style='quote']:not(.cst-replace) cst-t.cst-trans.cst-block { border-left-color: #fbcd08; }
+}
+
+/* —— 替换模式：隐藏原文，译文原位显示 —— */
+html.cst-replace cst-o.cst-orig { display: none !important; }
+html.cst-replace cst-t.cst-trans {
+  display: inline !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  opacity: 1 !important;
+  text-decoration: none !important;
+}
+cst-o.cst-orig { display: contents; }
