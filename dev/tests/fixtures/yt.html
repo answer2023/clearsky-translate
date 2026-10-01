@@ -1,0 +1,31 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Compound Interest Explained</title>
+<style>
+ body{margin:0;background:#0f0f0f;color:#fff;font-family:Roboto,Arial,sans-serif}
+ #top{height:56px;display:flex;align-items:center;padding:0 24px;font-weight:700;font-size:20px}
+ #movie_player{position:relative;width:960px;height:540px;margin:0 24px;background:linear-gradient(160deg,#2b3a5c,#121a30 60%,#06080f);overflow:hidden;border-radius:12px}
+ #movie_player video{position:absolute;inset:0;width:100%;height:100%;opacity:0}
+ .ytp-caption-window-container{position:absolute;bottom:40px;width:100%;text-align:center;font-size:22px}
+ .ytp-caption-window-container span{background:rgba(0,0,0,.75);padding:2px 6px}
+ .ytp-chrome-bottom{position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(transparent,rgba(0,0,0,.6));display:flex;align-items:center;justify-content:flex-end;padding:0 12px}
+ .ytp-subtitles-button{background:none;border:0;color:#fff;font-weight:700;font-size:13px;border-bottom:3px solid transparent}
+ .ytp-subtitles-button[aria-pressed=true]{border-bottom-color:#f00}
+ .chart{position:absolute;left:80px;top:70px;font:600 46px Georgia;color:#cfd8ff;opacity:.9}
+ h1{font-size:20px;margin:14px 24px}
+</style></head><body>
+<div id="top">▶ Video</div>
+<div id="movie_player" class="html5-video-player ytp-autohide">
+  <video src="/silence.wav" muted playsinline></video>
+  <div class="chart">A = P(1 + r)ⁿ</div>
+  <div class="ytp-caption-window-container"><span>native caption</span></div>
+  <div class="ytp-chrome-bottom"><button class="ytp-subtitles-button" aria-pressed="false">CC</button></div>
+</div>
+<h1>Compound Interest Explained</h1>
+<script>
+ const btn=document.querySelector('.ytp-subtitles-button');
+ btn.addEventListener('click',()=>{
+   const on=btn.getAttribute('aria-pressed')!=='true';
+   btn.setAttribute('aria-pressed',String(on));
+   if(on){const x=new XMLHttpRequest();x.open('GET','/api/timedtext?v=TESTVID01&lang=en&kind=asr&fmt=json3&pot=xyz');x.send();}
+ });
+</script>
+</body></html>
