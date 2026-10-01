@@ -34,10 +34,11 @@
 
   <h2>权限说明</h2>
   <ul>
-    <li><b>读取和更改网站数据</b>：用于识别网页中的段落并在原文旁插入译文；在 YouTube 页面读取播放器已加载的字幕并显示双语字幕。插件只在你点击翻译、开启"总是翻译此网站"或开启字幕时处理页面内容。</li>
-    <li><b>storage</b>：保存你的设置。</li>
-    <li><b>contextMenus</b>：提供右键菜单"翻译此页面"。</li>
-    <li><b>可选的网站访问权限</b>：仅在你配置大模型接口时，申请访问你填写的那个接口域名。</li>
+    <li><b>activeTab 与 scripting</b>：插件平时不读取任何网页。只有当你点击插件图标、按快捷键或使用右键菜单时，Chrome 才临时允许插件访问当前这一个标签页，用于识别段落并插入译文。</li>
+    <li><b>YouTube（www.youtube.com）</b>：读取播放器已加载的字幕并显示双语字幕。</li>
+    <li><b>translate.googleapis.com</b>：默认翻译引擎，用于获取译文。</li>
+    <li><b>可选的网站访问权限</b>：只在两种情况下、针对单个网站申请——你开启某个网站的"总是翻译此网站"，或你配置大模型接口时访问你填写的接口域名。可随时在设置中移除。</li>
+    <li><b>storage</b>：保存你的设置。<b>contextMenus</b>：提供右键菜单"翻译此页面"。</li>
   </ul>
 
   <h2>数据的出售与使用限制</h2>
@@ -50,7 +51,7 @@
     <h1>Privacy Policy (English)</h1>
     <p>ClearSky Bilingual Translate has no server of its own and does not collect, store, sell or share personal data or browsing history.</p>
     <p>When you translate a page or turn on bilingual subtitles, the text to be translated is sent only to the translation service you choose (Google Translate, or the LLM provider you configure) to obtain the translation. Settings are stored in <code>chrome.storage.sync</code>; your API key is stored only in <code>chrome.storage.local</code> on this device and is sent only to the provider you configured. Recent translations are cached in memory and discarded when the extension's background worker stops.</p>
-    <p>Host access is used solely to insert translations into pages and to render subtitles on YouTube. Optional host permission is requested only for the API endpoint you enter. No ads, analytics or tracking code are included. Contact: xtry96@gmail.com</p>
+    <p>The extension does not read any page by default: it uses activeTab to access only the current tab when you click its icon, press its shortcut or use its context menu. Host access is limited to YouTube (for subtitles) and the translation endpoint; optional per-site permission is requested only for sites you choose to always translate and for the API endpoint you enter. No ads, analytics or tracking code are included. Contact: xtry96@gmail.com</p>
   </section>
 </main>
 </body>

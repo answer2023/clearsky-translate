@@ -451,23 +451,29 @@
   }
 
   // ---------- 消息 ----------
+  // 脚本可能刚被按需注入、设置还没读完：等设置就绪后再处理指令，避免指令执行一半
+  let resolveReady;
+  const ready = new Promise((r) => { resolveReady = r; });
+  const COMMANDS = ['togglePage', 'startPage', 'stopPage', 'setMode', 'cycleMode', 'getPageState'];
+
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-    switch (msg?.type) {
-      case 'togglePage': toggle(); break;
-      case 'startPage': start(); break;
-      case 'stopPage': stop(); break;
-      case 'setMode':
-        if (!active) { settings.page.mode = msg.mode; start(); }
-        setMode(msg.mode);
-        break;
-      case 'cycleMode':
-        if (!active) start(); else setMode(mode === 'replace' ? 'bilingual' : 'replace');
-        break;
-      case 'getPageState':
-        break;
-      default: return;
-    }
-    sendResponse({ active, mode, host: HOST, done: doneSet.size });
+    if (!msg || !COMMANDS.includes(msg.type)) return;
+    ready.then(() => {
+      switch (msg.type) {
+        case 'togglePage': toggle(); break;
+        case 'startPage': start(); break;
+        case 'stopPage': stop(); break;
+        case 'setMode':
+          if (!active) { settings.page.mode = msg.mode; start(); }
+          setMode(msg.mode);
+          break;
+        case 'cycleMode':
+          if (!active) start(); else setMode(mode === 'replace' ? 'bilingual' : 'replace');
+          break;
+      }
+      sendResponse({ active, mode, host: HOST, done: doneSet.size });
+    });
+    return true;
   });
 
   chrome.storage.onChanged.addListener(async (changes, area) => {
@@ -486,6 +492,7 @@
     } catch (e) {
       return;
     }
+    resolveReady();
     if (location.protocol === 'chrome-extension:') return;
     ensureBall();
     if (settings.page.alwaysSites.includes(HOST)) start();

@@ -128,6 +128,7 @@ function renderSites() {
     b.title = '移除';
     b.addEventListener('click', () => {
       settings.page.alwaysSites = settings.page.alwaysSites.filter((x) => x !== h);
+      if (h !== 'www.youtube.com') chrome.permissions.remove({ origins: [`*://${h}/*`] }).catch(() => {});
       autosave();
       renderSites();
     });

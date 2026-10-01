@@ -233,6 +233,11 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           cache.clear();
           return { ok: true };
         }
+        case 'pageCommand': {
+          // 弹窗发来的页面指令：按需注入脚本后转发（依赖用户点击图标授予的 activeTab）
+          const state = await commandTab(msg.tabId, msg.cmd);
+          return state ? { ok: true, state } : { ok: false, error: '此页面无法翻译' };
+        }
         default:
           return { ok: false, error: 'unknown message' };
       }
@@ -250,20 +255,82 @@ chrome.runtime.onInstalled.addListener((details) => {
     chrome.contextMenus.create({ id: 'cst-mode', title: '切换：双语对照 ⇄ 仅译文', contexts: ['page'] });
   });
   if (details.reason === 'install') chrome.runtime.openOptionsPage();
+  syncAlwaysSites();
 });
 
-function sendToTab(tabId, payload) {
-  if (tabId == null) return;
-  chrome.tabs.sendMessage(tabId, payload).catch(() => {});
+// ---------- 按需注入（activeTab + scripting） ----------
+// 插件不常驻任何网页：用户点击图标、按快捷键或用右键菜单时，Chrome 临时授予当前标签页权限，再注入翻译脚本。
+async function ensurePageScript(tabId) {
+  try {
+    const r = await chrome.tabs.sendMessage(tabId, { type: 'getPageState' });
+    if (r) return true;
+  } catch (_) {}
+  try {
+    await chrome.scripting.insertCSS({ target: { tabId }, files: ['content/page.css'] });
+    await chrome.scripting.executeScript({ target: { tabId }, files: ['lib/defaults.js', 'content/page.js'] });
+    return true;
+  } catch (e) {
+    console.warn('[ClearSky] 无法注入此页面：', e.message);
+    return false;
+  }
+}
+
+async function commandTab(tabId, payload) {
+  if (tabId == null) return null;
+  if (!(await ensurePageScript(tabId))) return null;
+  // 脚本刚注入时需要一点时间读取设置
+  for (let i = 0; i < 10; i++) {
+    try {
+      const r = await chrome.tabs.sendMessage(tabId, payload);
+      if (r) return r;
+    } catch (_) {}
+    await new Promise((res) => setTimeout(res, 80));
+  }
+  return null;
 }
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.menuItemId === 'cst-toggle') sendToTab(tab?.id, { type: 'togglePage' });
-  if (info.menuItemId === 'cst-mode') sendToTab(tab?.id, { type: 'cycleMode' });
+  if (info.menuItemId === 'cst-toggle') commandTab(tab?.id, { type: 'togglePage' });
+  if (info.menuItemId === 'cst-mode') commandTab(tab?.id, { type: 'cycleMode' });
 });
 
 chrome.commands.onCommand.addListener(async (cmd, tab) => {
   if (cmd !== 'toggle-page') return;
   const t = tab || (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
-  sendToTab(t?.id, { type: 'togglePage' });
+  commandTab(t?.id, { type: 'togglePage' });
+});
+
+// ---------- "总是翻译此网站"：只为用户授权过的网站注册自动注入 ----------
+const ALWAYS_ID = 'cst-always';
+const sitePattern = (host) => `*://${host}/*`;
+
+async function syncAlwaysSites() {
+  try {
+    const s = await CST.loadSettings();
+    const matches = [];
+    for (const host of s.page.alwaysSites) {
+      if (await chrome.permissions.contains({ origins: [sitePattern(host)] })) matches.push(sitePattern(host));
+    }
+    const existing = await chrome.scripting.getRegisteredContentScripts({ ids: [ALWAYS_ID] });
+    if (existing.length) await chrome.scripting.unregisterContentScripts({ ids: [ALWAYS_ID] });
+    if (matches.length) {
+      await chrome.scripting.registerContentScripts([{
+        id: ALWAYS_ID,
+        matches,
+        js: ['lib/defaults.js', 'content/page.js'],
+        css: ['content/page.css'],
+        runAt: 'document_idle',
+        persistAcrossSessions: true
+      }]);
+    }
+  } catch (e) {
+    console.warn('[ClearSky] 同步自动翻译网站失败：', e.message);
+  }
+}
+
+chrome.runtime.onStartup.addListener(syncAlwaysSites);
+chrome.permissions.onAdded.addListener(syncAlwaysSites);
+chrome.permissions.onRemoved.addListener(syncAlwaysSites);
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'sync' && changes.settings) syncAlwaysSites();
 });

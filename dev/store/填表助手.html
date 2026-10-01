@@ -49,9 +49,11 @@ pre{white-space:pre-wrap;margin:8px 0 0;background:#f5f6fa;border-radius:8px;pad
 <h2>隐私权 · 单一用途</h2>
 <div class="f"><div class="top"><span>单一用途说明</span><button>复制</button></div><pre>将网页内容和视频字幕翻译成用户选择的语言，并以双语对照或替换原文的方式显示。</pre></div>
 <h2>隐私权 · 权限理由</h2>
+<div class="f"><div class="top"><span>activeTab</span><button>复制</button></div><pre>用户点击插件图标、按快捷键或使用右键菜单翻译当前网页时，临时访问当前标签页，识别段落并插入译文。插件不常驻、不读取未被用户操作的网页。</pre></div>
+<div class="f"><div class="top"><span>scripting</span><button>复制</button></div><pre>配合 activeTab，在用户主动发起翻译时向当前标签页注入翻译脚本和样式；以及为用户选择“总是翻译”的单个网站注册自动翻译脚本。</pre></div>
 <div class="f"><div class="top"><span>storage</span><button>复制</button></div><pre>保存用户的翻译设置（目标语言、显示方式、字幕样式、总是翻译的网站列表）和 API Key，均只保存在用户本地浏览器中。</pre></div>
 <div class="f"><div class="top"><span>contextMenus</span><button>复制</button></div><pre>提供右键菜单“翻译此页面 / 恢复原文”和“切换双语 / 仅译文”，方便用户一键操作。</pre></div>
-<div class="f"><div class="top"><span>主机权限（Host permission）</span><button>复制</button></div><pre>插件的核心功能是翻译用户正在浏览的任意网页：需要在网页中识别段落文字，并在原文旁插入译文；在 YouTube 页面读取播放器已加载的字幕并显示双语字幕。只有在用户点击翻译、开启“总是翻译此网站”或开启视频字幕时才处理页面内容。translate.googleapis.com 用于默认翻译引擎；可选主机权限仅在用户配置大模型接口时，申请访问用户填写的那一个接口域名。</pre></div>
+<div class="f"><div class="top"><span>主机权限（Host permission）</span><button>复制</button></div><pre>www.youtube.com：读取播放器已加载的字幕，显示双语字幕。translate.googleapis.com：默认翻译引擎，用于获取译文。可选主机权限：仅在用户开启某个网站的“总是翻译此网站”或配置大模型接口时，针对该单个域名申请，可随时移除。</pre></div>
 <div class="f"><div class="top"><span>远程代码（Remote code）</span><button>复制</button></div><pre>否，我没有使用远程代码。（No, I am not using remote code.）</pre></div>
 <h2>隐私权 · 数据使用</h2>
 <div class="f"><div class="top"><span>勾选项</span><button>复制</button></div><pre>只勾选“网站内容（Website content）”。其他类别都不勾。下面三项声明全部勾选。</pre></div>

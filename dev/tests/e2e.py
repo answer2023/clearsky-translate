@@ -16,7 +16,7 @@ def build_test_ext():
         src = os.path.join(ROOT, item)
         (shutil.copytree if os.path.isdir(src) else shutil.copy)(src, os.path.join(d, item))
     m = json.load(open(os.path.join(d, 'manifest.json')))
-    m['host_permissions'].append('http://127.0.0.1:8787/*')  # 测试用：免去权限弹窗
+    m['host_permissions'] += ['http://127.0.0.1:8787/*', '*://127.0.0.1/*']  # 测试用：相当于用户已授权（activeTab / 总是翻译）
     json.dump(m, open(os.path.join(d, 'manifest.json'), 'w'), ensure_ascii=False)
     return d
 
@@ -66,11 +66,20 @@ async def main():
             page = await ctx.new_page()
             page.on('pageerror', lambda e: errors.append('article: ' + str(e)))
             await page.goto('http://127.0.0.1:8787/article.html')
-            await page.wait_for_selector('cst-float')
             await asyncio.sleep(1.8)  # 等动态段落出现
+            check('按需注入：未操作前网页里没有插件脚本', await page.evaluate("!document.querySelector('cst-float')"))
             orig_html = await page.evaluate("document.querySelector('article').innerHTML")
             await page.screenshot(path=os.path.join(SHOTS, 'article-before.png'))
-            await page.click('cst-float >> .b')
+            tabs = await opt.evaluate("chrome.tabs.query({url:'http://127.0.0.1:8787/article.html'})")
+            tab_id = tabs[0]['id']
+            pop = await ctx.new_page()
+            pop.on('pageerror', lambda e: errors.append('popup: ' + str(e)))
+            await pop.set_viewport_size({'width': 340, 'height': 470})
+            await pop.goto(f'chrome-extension://{ext_id}/popup/popup.html?tab={tab_id}')
+            await pop.wait_for_selector('#toggle:not([disabled])', state='attached')
+            check('弹窗：未注入页面显示「翻译此页面」', '翻译此页面' in (await pop.text_content('#toggle')))
+            await pop.click('#toggle')
+            await page.bring_to_front()
             await page.wait_for_function("document.querySelectorAll('cst-t').length >= 8", timeout=10000)
             await asyncio.sleep(0.8)
             n = await page.evaluate("document.querySelectorAll('cst-t').length")
@@ -105,6 +114,7 @@ async def main():
             check('切回双语：无需重新请求', len(json.loads(await (await page.request.get('http://127.0.0.1:8787/log')).text())) <= len(log) + 1)  # 标题与 h1 同文时命中缓存
 
             # 弹窗截图
+            # 翻译开始后弹窗会自动关闭，重新打开一个看状态
             pop = await ctx.new_page()
             pop.on('pageerror', lambda e: errors.append('popup: ' + str(e)))
             await pop.set_viewport_size({'width': 340, 'height': 470})
@@ -121,6 +131,17 @@ async def main():
             await asyncio.sleep(0.3)
             restored = await page.evaluate("document.querySelector('article').innerHTML")
             check('恢复原文：DOM 与翻译前完全一致', restored == orig_html)
+
+            # ---------- 总是翻译此网站（动态注册内容脚本） ----------
+            await opt.evaluate("""(async()=>{const s=(await chrome.storage.sync.get('settings')).settings||{}; s.page=s.page||{}; s.page.alwaysSites=['127.0.0.1']; await chrome.storage.sync.set({settings:s});})()""")
+            await asyncio.sleep(1.0)
+            await page.reload()
+            await page.wait_for_function("document.querySelectorAll('cst-t').length >= 8", timeout=10000)
+            check('总是翻译：刷新后自动翻译', True)
+            await opt.evaluate("""(async()=>{const s=(await chrome.storage.sync.get('settings')).settings; s.page.alwaysSites=[]; await chrome.storage.sync.set({settings:s});})()""")
+            await asyncio.sleep(1.0)
+            await page.reload(); await asyncio.sleep(1.5)
+            check('总是翻译：移除后不再自动注入', await page.evaluate("!document.querySelector('cst-float') && !document.querySelector('cst-t')"))
 
             # ---------- 视频双语字幕 ----------
             async def yt_route(route):

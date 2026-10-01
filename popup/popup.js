@@ -10,6 +10,18 @@ async function sendToTab(msg) {
   try { return await chrome.tabs.sendMessage(tab.id, msg); } catch (_) { return null; }
 }
 
+const isWebPage = () => /^https?:/.test(tab?.url || '');
+const hostOf = () => { try { return new URL(tab.url).hostname; } catch (_) { return ''; } };
+
+// 页面指令：交给后台按需注入翻译脚本后执行（不常驻网页）
+async function command(cmd) {
+  const r = await chrome.runtime.sendMessage({ type: 'pageCommand', tabId: tab.id, cmd }).catch(() => null);
+  if (r && r.ok) return r.state;
+  $('pageHint').hidden = false;
+  $('pageHint').textContent = '这个页面不允许插件运行（如浏览器内置页、应用商店）。';
+  return pageState;
+}
+
 function renderEngine(status) {
   const el = $('engine');
   if (!status || !status.ok) { el.textContent = '引擎：谷歌免费翻译'; return; }
@@ -32,9 +44,7 @@ function renderPage() {
     btn.disabled = true;
     btn.textContent = '此页面无法翻译';
     hint.hidden = false;
-    hint.textContent = /^https?:/.test(tab?.url || '')
-      ? '插件刚安装或更新，刷新一下页面再试。'
-      : '浏览器内置页面（如设置页、扩展商店）不允许插件运行。';
+    hint.textContent = '浏览器内置页面（如设置页、扩展商店）不允许插件运行。';
     $('always').disabled = true;
     return;
   }
@@ -65,11 +75,13 @@ async function init() {
   $('ytEnabled').addEventListener('change', async (e) => { settings.youtube.enabled = e.target.checked; await save(); });
   $('ytOrig').addEventListener('change', async (e) => { settings.youtube.showOriginal = e.target.checked; await save(); });
 
+  // 页面里已有翻译脚本就读它的状态；还没注入时按"未翻译"显示，等用户点按钮再注入
   pageState = tab ? await sendToTab({ type: 'getPageState' }) : null;
+  if (!pageState && isWebPage()) pageState = { active: false, mode: settings.page.mode, host: hostOf(), injected: false };
   renderPage();
 
   $('toggle').addEventListener('click', async () => {
-    pageState = await sendToTab({ type: 'togglePage' });
+    pageState = await command({ type: 'togglePage' });
     renderPage();
     if (pageState?.active) setTimeout(() => window.close(), 250);
   });
@@ -77,18 +89,31 @@ async function init() {
   document.querySelectorAll('#mode button').forEach((b) => b.addEventListener('click', async () => {
     settings.page.mode = b.dataset.mode; // 记住偏好
     await save();
-    if (pageState) pageState = await sendToTab({ type: 'setMode', mode: b.dataset.mode });
+    if (pageState && pageState.active) pageState = await command({ type: 'setMode', mode: b.dataset.mode });
     renderPage();
   }));
 
   $('always').addEventListener('change', async (e) => {
     const host = pageState?.host;
     if (!host) return;
-    const set = new Set(settings.page.alwaysSites);
-    if (e.target.checked) set.add(host); else set.delete(host);
-    settings.page.alwaysSites = [...set];
-    await save();
-    if (e.target.checked && !pageState.active) { pageState = await sendToTab({ type: 'startPage' }); renderPage(); }
+    const pattern = `*://${host}/*`;
+    if (e.target.checked) {
+      // 只申请当前这一个网站的权限（必须在点击事件里直接调用）
+      const granted = await chrome.permissions.request({ origins: [pattern] }).catch(() => false);
+      if (!granted) {
+        e.target.checked = false;
+        $('pageHint').hidden = false;
+        $('pageHint').textContent = '需要允许访问该网站，才能每次打开时自动翻译。';
+        return;
+      }
+      settings.page.alwaysSites = [...new Set([...settings.page.alwaysSites, host])];
+      await save();
+      if (!pageState.active) { pageState = await command({ type: 'startPage' }); renderPage(); }
+    } else {
+      settings.page.alwaysSites = settings.page.alwaysSites.filter((h) => h !== host);
+      await save();
+      if (host !== 'www.youtube.com') chrome.permissions.remove({ origins: [pattern] }).catch(() => {});
+    }
   });
 
   const openOpts = (e) => { e.preventDefault(); chrome.runtime.openOptionsPage(); };

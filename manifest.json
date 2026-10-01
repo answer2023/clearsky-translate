@@ -26,10 +26,13 @@
   },
   "permissions": [
     "storage",
-    "contextMenus"
+    "contextMenus",
+    "activeTab",
+    "scripting"
   ],
   "host_permissions": [
-    "https://translate.googleapis.com/*"
+    "https://translate.googleapis.com/*",
+    "https://www.youtube.com/*"
   ],
   "optional_host_permissions": [
     "https://*/*",
@@ -64,8 +67,7 @@
     },
     {
       "matches": [
-        "http://*/*",
-        "https://*/*"
+        "https://www.youtube.com/*"
       ],
       "js": [
         "lib/defaults.js",
