@@ -1,0 +1,74 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>ClearSky 上架填表助手</title>
+<style>
+body{margin:0;background:#f5f6fa;font:14px/1.6 -apple-system,"PingFang SC",sans-serif;color:#171a2b}
+header{background:#022A99;color:#fff;padding:18px 28px;position:sticky;top:0;z-index:2}
+header b{color:#FBCD08;font-size:18px}header p{margin:4px 0 0;opacity:.85}
+main{max-width:860px;margin:0 auto;padding:20px}
+h2{font-size:16px;margin:26px 0 10px;padding-left:10px;border-left:4px solid #FBCD08}
+.f{background:#fff;border:1px solid #e3e6ef;border-radius:12px;padding:12px 14px;margin:10px 0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.top span{font-weight:700}
+button{background:#022A99;color:#fff;border:0;border-radius:8px;padding:6px 14px;font-weight:600;cursor:pointer}
+button.ok{background:#FBCD08;color:#022A99}
+pre{white-space:pre-wrap;margin:8px 0 0;background:#f5f6fa;border-radius:8px;padding:10px;font:13px/1.6 -apple-system,"PingFang SC",sans-serif;max-height:220px;overflow:auto}
+.imgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.imgs div{background:#fff;border:1px solid #e3e6ef;border-radius:10px;padding:8px;font-size:12px}
+.imgs img{width:100%;border-radius:6px;display:block;margin-bottom:6px;background:#eee}
+</style></head><body>
+<header><b>ClearSky 双语翻译 · 上架填表助手</b><p>每一栏点「复制」，再到开发者后台对应位置粘贴（⌘V）。图片在本文件同一文件夹里，拖进上传框即可。</p></header><main>
+<h2>商品详情</h2>
+<div class="f"><div class="top"><span>说明（Description）</span><button>复制</button></div><pre>ClearSky 双语翻译：读外文网页、看外文视频，一个插件搞定。
+
+【网页翻译】
+• 双语对照：每段原文下方显示译文，适合阅读外文资料、研报、新闻
+• 仅显示译文：整页替换成中文，链接照常可点
+• 两种模式随时切换，切换不重复请求，速度快、省费用
+• 只翻译你看到的部分，长页面不卡顿；网页后加载的内容也会自动翻译
+• 自动跳过代码块、输入框和本来就是中文的段落
+• 可设置&quot;总是翻译此网站&quot;，打开即译
+• 5 种译文样式：简洁、柔和灰、虚线、荧光笔、引用竖线
+• 快捷键 Alt+A、右键菜单、页面悬浮按钮，三种方式一键翻译
+
+【视频双语字幕（YouTube）】
+• 打开字幕后自动换成双语字幕：原文在上、译文在下
+• 自动生成的字幕先按句断开再翻译，不再是一个词一个词地跳
+• 优先翻译当前播放位置，拖动进度条也能马上跟上
+• 字号、颜色、背景透明度可调，可只显示译文
+
+【翻译引擎】
+• 零配置：默认使用谷歌免费翻译
+• 接入大模型：DeepSeek、通义千问（阿里云百炼）、Kimi、智谱 GLM、OpenAI、OpenRouter，或任何 OpenAI 兼容接口
+• 智能模式：大模型出错时自动退回免费翻译，不会翻译到一半卡住
+
+【隐私】
+• 没有自己的服务器，不收集任何浏览数据
+• 文字只发送给你选择的翻译服务
+• API Key 只保存在本机浏览器，不同步、不上传</pre></div>
+<div class="f"><div class="top"><span>类别（Category）</span><button>复制</button></div><pre>生产工具（Productivity）</pre></div>
+<div class="f"><div class="top"><span>语言</span><button>复制</button></div><pre>中文（简体）</pre></div>
+<h2>隐私权 · 单一用途</h2>
+<div class="f"><div class="top"><span>单一用途说明</span><button>复制</button></div><pre>将网页内容和视频字幕翻译成用户选择的语言，并以双语对照或替换原文的方式显示。</pre></div>
+<h2>隐私权 · 权限理由</h2>
+<div class="f"><div class="top"><span>storage</span><button>复制</button></div><pre>保存用户的翻译设置（目标语言、显示方式、字幕样式、总是翻译的网站列表）和 API Key，均只保存在用户本地浏览器中。</pre></div>
+<div class="f"><div class="top"><span>contextMenus</span><button>复制</button></div><pre>提供右键菜单“翻译此页面 / 恢复原文”和“切换双语 / 仅译文”，方便用户一键操作。</pre></div>
+<div class="f"><div class="top"><span>主机权限（Host permission）</span><button>复制</button></div><pre>插件的核心功能是翻译用户正在浏览的任意网页：需要在网页中识别段落文字，并在原文旁插入译文；在 YouTube 页面读取播放器已加载的字幕并显示双语字幕。只有在用户点击翻译、开启“总是翻译此网站”或开启视频字幕时才处理页面内容。translate.googleapis.com 用于默认翻译引擎；可选主机权限仅在用户配置大模型接口时，申请访问用户填写的那一个接口域名。</pre></div>
+<div class="f"><div class="top"><span>远程代码（Remote code）</span><button>复制</button></div><pre>否，我没有使用远程代码。（No, I am not using remote code.）</pre></div>
+<h2>隐私权 · 数据使用</h2>
+<div class="f"><div class="top"><span>勾选项</span><button>复制</button></div><pre>只勾选“网站内容（Website content）”。其他类别都不勾。下面三项声明全部勾选。</pre></div>
+<div class="f"><div class="top"><span>隐私权政策网址</span><button>复制</button></div><pre>https://answer2023.github.io/clearsky-translate/privacy.html</pre></div>
+<h2>分发</h2>
+<div class="f"><div class="top"><span>付费 / 地区</span><button>复制</button></div><pre>免费；所有地区</pre></div>
+<h2>图片（拖到上传框）</h2><div class="imgs">
+<div><img src="store-icon-128.png" alt="">商店图标 128×128<br><code>store-icon-128.png</code></div>
+<div><img src="screenshot-1-bilingual.png" alt="">截图 1<br><code>screenshot-1-bilingual.png</code></div>
+<div><img src="screenshot-2-replace.png" alt="">截图 2<br><code>screenshot-2-replace.png</code></div>
+<div><img src="screenshot-3-video.png" alt="">截图 3<br><code>screenshot-3-video.png</code></div>
+<div><img src="screenshot-4-engine.png" alt="">截图 4<br><code>screenshot-4-engine.png</code></div>
+<div><img src="promo-small-440x280.png" alt="">小型宣传图块 440×280<br><code>promo-small-440x280.png</code></div>
+<div><img src="promo-marquee-1400x560.png" alt="">顶部宣传图块 1400×560（选填）<br><code>promo-marquee-1400x560.png</code></div>
+</div></main><script>
+document.querySelectorAll('.f button').forEach(b=>b.onclick=async()=>{
+ const t=b.closest('.f').querySelector('pre').innerText;
+ try{await navigator.clipboard.writeText(t)}catch(e){const r=document.createRange();r.selectNodeContents(b.closest('.f').querySelector('pre'));getSelection().removeAllRanges();getSelection().addRange(r);document.execCommand('copy')}
+ b.textContent='已复制 ✓';b.classList.add('ok');setTimeout(()=>{b.textContent='复制';b.classList.remove('ok')},1500)});
+</script></body></html>
