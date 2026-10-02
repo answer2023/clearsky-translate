@@ -145,7 +145,7 @@ function fillVideo() {
   bindSwitch('ytEnabled', () => y.enabled, (v) => { y.enabled = v; });
   bindSwitch('ytAutoCC', () => y.autoCC !== false, (v) => { y.autoCC = v; });
   bindSwitch('ytOrig', () => y.showOriginal, (v) => { y.showOriginal = v; });
-  bindSwitch('ytFixed', () => !!y.fixedSize, (v) => { y.fixedSize = v; });
+  bindSwitch('ytScaleWithPlayer', () => !!y.scaleWithPlayer, (v) => { y.scaleWithPlayer = v; });
 
   const range = (id, out, key, fmt) => {
     $(id).value = y[key];
