@@ -26,6 +26,19 @@
     return m ? m[2] : null;
   };
 
+  // 插件被更新/重新加载后旧脚本失效：收起双语字幕层，恢复原生字幕，停止工作
+  const contextLost = (e) => !chrome.runtime?.id || /context invalidated/i.test(String(e && e.message || e));
+  let dead = false;
+  function shutdown() {
+    if (dead) return;
+    dead = true;
+    token++;
+    if (rafId) cancelAnimationFrame(rafId);
+    if (player) player.classList.remove('cst-yt-on', 'cst-yt-live');
+    if (overlay) overlay.remove();
+    console.info('[ClearSky] 插件已更新，刷新页面后双语字幕恢复');
+  }
+
   // ---------- 接收字幕数据 ----------
   window.addEventListener('message', (e) => {
     if (e.source !== window || !e.data || e.data.source !== 'cst-yt' || e.data.type !== 'timedtext') return;
@@ -105,6 +118,7 @@
       chunk.state = 'done';
       lastIdx = -2; // 强制重绘
     } catch (e) {
+      if (contextLost(e)) { shutdown(); return; }
       if (t !== token) return;
       chunk.state = 'error';
       console.warn('[ClearSky] 字幕翻译失败：', e.message || e);
@@ -152,6 +166,7 @@
   }
 
   function render() {
+    if (dead) return;
     rafId = requestAnimationFrame(render);
     if (!overlay || !video) return;
     const vid = currentVideoId();
@@ -231,7 +246,8 @@
         live.trFor = text;
         if (live.text === text || live.text.startsWith(text.slice(0, 20))) transEl.textContent = live.tr;
       }
-    } catch (_) {
+    } catch (e) {
+      if (contextLost(e)) { shutdown(); return; }
     } finally {
       live.busy = false;
       if (live.pending && live.pending !== text) { const t = live.pending; live.pending = ''; requestLiveTranslation(t); }

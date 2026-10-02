@@ -37,6 +37,17 @@
   let generation = 0; // 每次重新开始翻译时递增，丢弃过期结果
 
   // ---------- 工具 ----------
+  // 插件被更新/重新加载后，页面里的旧脚本会和后台断开（Extension context invalidated）
+  const contextLost = (e) => !chrome.runtime?.id || /context invalidated/i.test(String(e && e.message || e));
+  let dead = false;
+  function onContextLost() {
+    if (dead) return;
+    dead = true;
+    try { stop(); } catch (_) {}
+    errorShown = false;
+    showToast('插件已更新，请刷新页面后继续使用');
+  }
+
   const norm = (s) => s.replace(/[\s ]+/g, ' ').trim();
 
   function isOurs(node) {
@@ -199,7 +210,8 @@
     } catch (e) {
       // 失败的段落清除状态：重新开关翻译即可重试（避免可见区域内无限重试）
       items.forEach((it) => state.delete(it.el));
-      showToast('翻译失败：' + (e.message || e));
+      if (contextLost(e)) onContextLost();
+      else showToast('翻译失败：' + (e.message || e));
     } finally {
       inflight--;
       updateBall();
@@ -421,7 +433,10 @@
       <div class="t"></div>`;
     ballBtn = shadow.querySelector('.b');
     toastEl = shadow.querySelector('.t');
-    ballBtn.addEventListener('click', toggle);
+    ballBtn.addEventListener('click', () => {
+      if (dead || contextLost()) { onContextLost(); errorShown = false; showToast('插件已更新，请刷新页面后继续使用'); return; }
+      toggle();
+    });
     document.documentElement.appendChild(ballHost);
     updateBall();
   }
