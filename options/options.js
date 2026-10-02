@@ -153,7 +153,8 @@ function fillVideo() {
     $(id).addEventListener('input', () => { y[key] = Number($(id).value); show(); refreshPreviews(); });
     $(id).addEventListener('change', autosave);
   };
-  range('ytScale', 'ytScaleOut', 'fontScale', (v) => Math.round(v * 100) + '%');
+  range('ytOrigScale', 'ytOrigScaleOut', 'origScale', (v) => Math.round(v * 100) + '%');
+  range('ytTransScale', 'ytTransScaleOut', 'transScale', (v) => Math.round(v * 100) + '%');
   range('ytBg', 'ytBgOut', 'bgOpacity', (v) => Math.round(v * 100) + '%');
 
   const sw = $('ytColors');
@@ -180,7 +181,8 @@ function refreshPreviews() {
   document.documentElement.dataset.cstStyle = settings.page.style;
   const y = settings.youtube;
   const p = $('ytPreview');
-  p.style.setProperty('--cst-size', (22 * y.fontScale).toFixed(1) + 'px');
+  p.style.setProperty('--cst-orig-size', (22 * (y.fontScale || 1) * y.origScale).toFixed(1) + 'px');
+  p.style.setProperty('--cst-trans-size', (22 * (y.fontScale || 1) * y.transScale).toFixed(1) + 'px');
   p.style.setProperty('--cst-trans', y.transColor);
   p.style.setProperty('--cst-bg', `rgba(8,8,12,${y.bgOpacity})`);
   p.classList.toggle('no-orig', !y.showOriginal);

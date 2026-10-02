@@ -155,6 +155,8 @@
     const y = settings.youtube;
     const base = Math.max(14, Math.min(40, h * 0.042)) * (Number(y.fontScale) || 1);
     overlay.style.setProperty('--cst-size', base.toFixed(1) + 'px');
+    overlay.style.setProperty('--cst-orig-size', (base * (Number(y.origScale) || 1)).toFixed(1) + 'px');
+    overlay.style.setProperty('--cst-trans-size', (base * (Number(y.transScale) || 1)).toFixed(1) + 'px');
     overlay.style.setProperty('--cst-trans', y.transColor || '#FBCD08');
     overlay.style.setProperty('--cst-orig', y.origColor || '#FFFFFF');
     overlay.style.setProperty('--cst-bg', `rgba(8,8,12,${y.bgOpacity ?? 0.55})`);

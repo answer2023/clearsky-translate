@@ -46,8 +46,8 @@ h2::before { content: ""; width: 4px; height: 16px; border-radius: 2px; backgrou
 .video-preview { margin: 10px 0; aspect-ratio: 16 / 6; border-radius: 10px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 18px;
   background: linear-gradient(160deg, #3a4a6b 0%, #1d2540 55%, #0b0f1f 100%); overflow: hidden; }
 .video-preview .cst-yt-box { max-width: 88%; text-align: center; background: var(--cst-bg); border-radius: 6px; padding: .25em .6em .3em; }
-.video-preview .cst-yt-orig { color: #fff; font-size: calc(var(--cst-size) * .86); line-height: 1.35; text-shadow: 0 1px 2px rgba(0,0,0,.8); }
-.video-preview .cst-yt-trans { color: var(--cst-trans); font-size: var(--cst-size); font-weight: 600; line-height: 1.4; text-shadow: 0 1px 2px rgba(0,0,0,.85); }
+.video-preview .cst-yt-orig { color: #fff; font-size: var(--cst-orig-size); line-height: 1.35; text-shadow: 0 1px 2px rgba(0,0,0,.8); }
+.video-preview .cst-yt-trans { color: var(--cst-trans); font-size: var(--cst-trans-size); font-weight: 600; line-height: 1.4; text-shadow: 0 1px 2px rgba(0,0,0,.85); }
 .video-preview.no-orig .cst-yt-orig { display: none; }
 
 @media (max-width: 640px) {

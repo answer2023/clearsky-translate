@@ -31,13 +31,13 @@
 }
 #cst-yt-overlay .cst-yt-orig {
   color: var(--cst-orig, #fff);
-  font-size: calc(var(--cst-size, 22px) * 0.86);
+  font-size: var(--cst-orig-size, 22px);
   line-height: 1.35;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 #cst-yt-overlay .cst-yt-trans {
   color: var(--cst-trans, #FBCD08);
-  font-size: var(--cst-size, 22px);
+  font-size: var(--cst-trans-size, 22px);
   font-weight: 600;
   line-height: 1.4;
   margin-top: 0.1em;
@@ -51,7 +51,7 @@
 #cst-yt-overlay.cst-single .cst-yt-orig,
 #cst-yt-overlay.cst-no-orig.cst-single .cst-yt-orig {
   display: block;
-  font-size: var(--cst-size, 22px);
+  font-size: var(--cst-orig-size, 22px);
 }
 
 /* 视频没有字幕时的提示 */

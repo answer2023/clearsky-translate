@@ -150,6 +150,9 @@ async def main():
                     await route.fulfill(path=os.path.join(FIX, 'timedtext.json'), content_type='application/json')
                 elif url.endswith('/silence.wav'):
                     await route.fulfill(path=os.path.join(FIX, 'silence.wav'), content_type='audio/wav')
+                elif '/watch' in url and 'NOCCVID01' in url:
+                    html = open(os.path.join(FIX, 'yt.html'), encoding='utf-8').read().replace('aria-pressed="false">CC', 'aria-pressed="false" data-title-no-tooltip="无法显示字幕">CC')
+                    await route.fulfill(body=html, content_type='text/html; charset=utf-8')
                 elif '/watch' in url and 'LIVEVID01' in url:
                     await route.fulfill(path=os.path.join(FIX, 'yt-live.html'), content_type='text/html; charset=utf-8')
                 elif '/watch' in url:
@@ -168,6 +171,8 @@ async def main():
             o = await yt.evaluate("[document.querySelector('.cst-yt-orig').textContent, document.querySelector('.cst-yt-trans').textContent]")
             check('视频：自动字幕断句为完整句子', o[0] == "so today we're going to talk about how compound interest works", o)
             check('视频：显示中文译文', o[1] == '今天我们来聊聊复利是怎么运作的', o)
+            fs = await yt.evaluate("[getComputedStyle(document.querySelector('.cst-yt-orig')).fontSize, getComputedStyle(document.querySelector('.cst-yt-trans')).fontSize]")
+            check('视频：原文译文字号默认一致', fs[0] == fs[1], fs)
             check('视频：原生字幕被隐藏', await yt.evaluate("getComputedStyle(document.querySelector('.ytp-caption-window-container')).display==='none'"))
             await yt.evaluate("document.querySelector('#movie_player').classList.remove('ytp-autohide')")
             await asyncio.sleep(0.3)
@@ -189,6 +194,14 @@ async def main():
             check('直播：读取原生字幕并翻译', True)
             check('直播：原生字幕透明隐藏而非移除', await lv.evaluate("getComputedStyle(document.querySelector('.ytp-caption-window-container')).opacity==='0'"))
             await lv.screenshot(path=os.path.join(SHOTS, 'video-live.png'))
+
+            # ---------- 没有字幕的视频：给出提示 ----------
+            nc = await ctx.new_page()
+            nc.on('pageerror', lambda e: errors.append('nocc: ' + str(e)))
+            await nc.goto('https://www.youtube.com/watch?v=NOCCVID01')
+            await nc.wait_for_selector('.cst-yt-hint.show', timeout=8000)
+            check('无字幕视频：提示「这个视频没有字幕」', '没有字幕' in (await nc.text_content('.cst-yt-hint')))
+            check('无字幕视频：不会去点 CC', await nc.evaluate("document.querySelector('.ytp-subtitles-button').getAttribute('aria-pressed')==='false'"))
 
             check('全程无页面脚本错误', not errors, errors)
             await ctx.close()
