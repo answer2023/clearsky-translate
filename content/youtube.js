@@ -18,6 +18,7 @@
   let lastIdx = -2;
   let autoCCDoneFor = '';
   let token = 0;
+  let mode = '';
 
   const currentVideoId = () => {
     const u = new URL(location.href);
@@ -171,8 +172,15 @@
     if (!overlay || !video) return;
     const vid = currentVideoId();
     const hasTrack = !!(track && track.videoId === vid);
-    // 直播等拿不到字幕文件的情况：改为实时读取播放器上的字幕再翻译
-    if (settings.youtube.enabled && !hasTrack && ccOn() && renderLive()) return;
+    // 直播：字幕边播边生成，字幕文件的时间轴与播放时间对不上，统一改为实时读取播放器上的字幕再翻译
+    const isLive = video.duration === Infinity || player.classList.contains('ytp-live');
+    // 有字幕文件但当前时间找不到对应字幕、而播放器上正显示着字幕：同样走实时模式兜底
+    const noCueNow = hasTrack && Subs.findCue(track.cues, video.currentTime * 1000) < 0 && !!readNativeCaption();
+    if (settings.youtube.enabled && ccOn() && (!hasTrack || isLive || noCueNow) && renderLive()) {
+      if (mode !== 'live') { mode = 'live'; console.info('[ClearSky] 字幕模式：实时读取（直播）'); }
+      return;
+    }
+    if (mode !== 'file' && hasTrack) { mode = 'file'; console.info('[ClearSky] 字幕模式：字幕文件'); }
     player.classList.remove('cst-yt-live');
     const visible = settings.youtube.enabled && hasTrack && ccOn();
     player.classList.toggle('cst-yt-on', !!visible);
