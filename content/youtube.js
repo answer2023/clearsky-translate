@@ -153,7 +153,9 @@
     if (!overlay || !player || !settings) return;
     const h = player.clientHeight || 360;
     const y = settings.youtube;
-    const base = Math.max(14, Math.min(40, h * 0.042)) * (Number(y.fontScale) || 1);
+    // 字号随播放器大小温和变化：普通窗口约 22px，全屏最多 28px；也可在设置里固定字号
+    const auto = Math.max(16, Math.min(28, 14 + h * 0.016));
+    const base = (y.fixedSize ? 22 : auto) * (Number(y.fontScale) || 1);
     overlay.style.setProperty('--cst-size', base.toFixed(1) + 'px');
     overlay.style.setProperty('--cst-orig-size', (base * (Number(y.origScale) || 1)).toFixed(1) + 'px');
     overlay.style.setProperty('--cst-trans-size', (base * (Number(y.transScale) || 1)).toFixed(1) + 'px');
