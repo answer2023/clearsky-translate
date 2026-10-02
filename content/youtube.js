@@ -268,12 +268,40 @@
   }
 
   // ---------- 自动打开字幕（只点一次，尊重用户之后的选择） ----------
+  // 视频本身没有字幕（CC 按钮显示“无法显示字幕”）
+  const NO_CC = /无法|無法|unavailable|不可用|利用できません|사용할 수 없/i;
+  function captionsUnavailable(btn) {
+    if (!btn) return false;
+    const label = [btn.getAttribute('data-title-no-tooltip'), btn.getAttribute('title'), btn.getAttribute('aria-label'), btn.getAttribute('data-tooltip-title')].filter(Boolean).join(' ');
+    return NO_CC.test(label);
+  }
+
+  let hintFor = '';
+  function showNoCaptionHint() {
+    const vid = currentVideoId();
+    if (!player || hintFor === vid) return;
+    hintFor = vid;
+    const el = document.createElement('div');
+    el.className = 'cst-yt-hint cst-skip notranslate';
+    el.textContent = '这个视频没有字幕，暂时无法翻译';
+    player.appendChild(el);
+    setTimeout(() => el.classList.add('show'), 30);
+    setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 400); }, 4500);
+  }
+
   function maybeAutoCC() {
-    if (!settings.youtube.enabled || settings.youtube.autoCC === false) return;
+    if (!settings.youtube.enabled) return;
     const vid = currentVideoId();
     if (!vid || autoCCDoneFor === vid) return;
     const btn = document.querySelector('#movie_player .ytp-subtitles-button');
-    if (!btn || btn.style.display === 'none' || btn.getAttribute('aria-disabled') === 'true') return;
+    if (!btn || btn.style.display === 'none') return;
+    if (!btn.__cstHooked) {
+      btn.__cstHooked = true;
+      // 用户手动点 CC 而视频没字幕时，也提示一次
+      btn.addEventListener('click', () => { if (captionsUnavailable(btn)) { hintFor = ''; showNoCaptionHint(); } });
+    }
+    if (captionsUnavailable(btn)) { autoCCDoneFor = vid; showNoCaptionHint(); return; }
+    if (settings.youtube.autoCC === false || btn.getAttribute('aria-disabled') === 'true') return;
     autoCCDoneFor = vid;
     if (btn.getAttribute('aria-pressed') === 'false') btn.click();
   }

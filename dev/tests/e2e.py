@@ -150,6 +150,8 @@ async def main():
                     await route.fulfill(path=os.path.join(FIX, 'timedtext.json'), content_type='application/json')
                 elif url.endswith('/silence.wav'):
                     await route.fulfill(path=os.path.join(FIX, 'silence.wav'), content_type='audio/wav')
+                elif '/watch' in url and 'LIVEVID01' in url:
+                    await route.fulfill(path=os.path.join(FIX, 'yt-live.html'), content_type='text/html; charset=utf-8')
                 elif '/watch' in url:
                     await route.fulfill(path=os.path.join(FIX, 'yt.html'), content_type='text/html; charset=utf-8')
                 else:
@@ -178,6 +180,15 @@ async def main():
             await yt.click('.ytp-subtitles-button')
             await asyncio.sleep(0.3)
             check('视频：关闭 CC 后双语层隐藏', await yt.evaluate("document.querySelector('#cst-yt-overlay').style.display==='none'"))
+
+            # ---------- 直播字幕（无字幕文件，实时读取原生字幕） ----------
+            lv = await ctx.new_page()
+            lv.on('pageerror', lambda e: errors.append('live: ' + str(e)))
+            await lv.goto('https://www.youtube.com/watch?v=LIVEVID01')
+            await lv.wait_for_function("(document.querySelector('.cst-yt-trans')||{}).textContent === '它是个人理财中最强大的力量。'", timeout=10000)
+            check('直播：读取原生字幕并翻译', True)
+            check('直播：原生字幕透明隐藏而非移除', await lv.evaluate("getComputedStyle(document.querySelector('.ytp-caption-window-container')).opacity==='0'"))
+            await lv.screenshot(path=os.path.join(SHOTS, 'video-live.png'))
 
             check('全程无页面脚本错误', not errors, errors)
             await ctx.close()
