@@ -1,10 +1,12 @@
 // ClearSky 双语翻译 — 后台服务（MV3 service worker）
 // 负责：翻译引擎调度（大模型 / 谷歌免费接口）、批量切分、并发控制、缓存、右键菜单与快捷键
 import './lib/defaults.js';
-import { parseLLMArray, parseGoogleBatch, parseGoogleSingle, chunkTexts } from './lib/engine-utils.js';
+import { parseLLMArray, parseGoogleBatch, parseGoogleSingle, chunkTexts, msLang, parseMicrosoft } from './lib/engine-utils.js';
 
 const CST = globalThis.CST;
 const GOOGLE_BASE = 'https://translate.googleapis.com';
+const MS_AUTH = 'https://edge.microsoft.com/translate/auth';
+const MS_API = 'https://api-edge.cognitive.microsofttranslator.com/translate';
 
 // ---------- 缓存（LRU） ----------
 const CACHE_MAX = 8000;
@@ -35,6 +37,7 @@ function semaphore(max) {
 }
 const llmLimit = semaphore(4);
 const googleLimit = semaphore(6);
+const msLimit = semaphore(4);
 
 // ---------- 设置（带短缓存） ----------
 let settingsCache = null;
@@ -72,6 +75,50 @@ async function googleBatch(texts, tl) {
     // 批量接口不可用时逐条翻译
     return Promise.all(texts.map((t) => googleLimit(() => googleSingle(t, tl))));
   }
+}
+
+// ---------- 微软免费翻译（与 Edge 浏览器网页翻译同源，国内可直连） ----------
+let msToken = null; // { token, exp }
+async function getMsToken(force = false) {
+  if (!force && msToken && Date.now() < msToken.exp) return msToken.token;
+  const res = await fetch(MS_AUTH);
+  if (!res.ok) throw new Error(`微软翻译授权失败 ${res.status}`);
+  const token = (await res.text()).trim();
+  if (!token || token.length < 50) throw new Error('微软翻译授权失败');
+  msToken = { token, exp: Date.now() + 8 * 60 * 1000 }; // 令牌约 10 分钟有效，提前刷新
+  return token;
+}
+
+async function microsoftBatch(texts, tl) {
+  const call = async (force) => {
+    const token = await getMsToken(force);
+    return msLimit(() => fetch(`${MS_API}?from=&to=${encodeURIComponent(msLang(tl))}&api-version=3.0`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(texts.map((t) => ({ Text: t })))
+    }));
+  };
+  let res = await call(false);
+  if (res.status === 401) res = await call(true); // 令牌过期，刷新一次
+  if (!res.ok) throw new Error(`微软翻译返回 ${res.status}`);
+  const out = parseMicrosoft(await res.json(), texts.length);
+  if (!out) throw new Error('微软翻译返回格式异常');
+  return out;
+}
+
+// 免费翻译：先用首选引擎，失败自动换另一个
+async function freeBatch(texts, tl, primary) {
+  const order = primary === 'google' ? ['google', 'microsoft'] : ['microsoft', 'google'];
+  let lastErr;
+  for (const eng of order) {
+    try {
+      const out = eng === 'microsoft' ? await microsoftBatch(texts, tl) : await googleBatch(texts, tl);
+      return { out, eng };
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr || new Error('免费翻译不可用');
 }
 
 // ---------- 大模型（OpenAI 兼容接口） ----------
@@ -152,9 +199,10 @@ let lastError = null;
 async function translateTexts(texts, kind = 'page') {
   const s = await getSettings();
   const target = s.targetLang;
+  const freePrimary = s.freeEngine === 'google' ? 'google' : 'microsoft';
   const useLLM = s.engine === 'llm' || (s.engine === 'auto' && CST.llmConfigured(s));
   if (s.engine === 'llm' && !CST.llmConfigured(s)) throw new Error('尚未配置大模型 API，请在设置页填写');
-  const engineKey = useLLM ? `llm:${s.llm.model}` : 'google';
+  const engineKey = useLLM ? `llm:${s.llm.model}` : `free:${freePrimary}`;
 
   const result = new Array(texts.length);
   const todo = [];
@@ -176,24 +224,27 @@ async function translateTexts(texts, kind = 'page') {
     offset += chunk.length;
     return (async () => {
       let out;
-      let eng = engineKey;
+      let cacheKey = engineKey;
       if (useLLM) {
         try {
           out = await llmBatch(chunk, target, kind, s.llm);
         } catch (e) {
           lastError = { message: e.message, at: Date.now() };
           if (s.engine === 'llm') throw e;
-          out = await googleBatch(chunk, target); // auto 模式下大模型失败时兜底
-          eng = 'google';
-          usedEngine = 'google(fallback)';
+          const r = await freeBatch(chunk, target, freePrimary); // 智能模式：大模型失败时用免费翻译兜底
+          out = r.out;
+          cacheKey = `free:${freePrimary}`;
+          usedEngine = `${r.eng}(fallback)`;
         }
       } else {
-        out = await googleBatch(chunk, target);
+        const r = await freeBatch(chunk, target, freePrimary);
+        out = r.out;
+        if (r.eng !== freePrimary) usedEngine = `${r.eng}(fallback)`;
       }
       out.forEach((tr, j) => {
         const idx = todo[start + j];
         result[idx] = tr;
-        cacheSet(`${eng}|${target}|${kind}|${texts[idx]}`, tr);
+        cacheSet(`${cacheKey}|${target}|${kind}|${texts[idx]}`, tr);
       });
     })();
   });
@@ -224,7 +275,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           const s = await getSettings();
           return {
             ok: true,
-            engine: s.engine === 'google' || (s.engine === 'auto' && !CST.llmConfigured(s)) ? 'google' : 'llm',
+            engine: s.engine === 'free' || (s.engine === 'auto' && !CST.llmConfigured(s)) ? (s.freeEngine === 'google' ? 'google' : 'microsoft') : 'llm',
             model: s.llm.model,
             lastError
           };

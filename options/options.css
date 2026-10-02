@@ -55,3 +55,5 @@ h2::before { content: ""; width: 4px; height: 16px; border-radius: 2px; backgrou
   .grid { grid-template-columns: 1fr; }
   .row { flex-wrap: wrap; }
 }
+
+.free-row { margin: -2px 0 14px; padding: 0 0 14px; border-bottom: 1px solid var(--line); }

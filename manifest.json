@@ -32,7 +32,9 @@
   ],
   "host_permissions": [
     "https://translate.googleapis.com/*",
-    "https://www.youtube.com/*"
+    "https://www.youtube.com/*",
+    "https://edge.microsoft.com/*",
+    "https://api-edge.cognitive.microsofttranslator.com/*"
   ],
   "optional_host_permissions": [
     "https://*/*",

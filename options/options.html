@@ -24,12 +24,20 @@
     <!-- 引擎 -->
     <section id="engine" class="card">
       <h2>翻译引擎</h2>
-      <p class="muted">不配置也能用：默认走谷歌免费翻译。填上大模型 API 后，译文更通顺、术语更准确；大模型出错时会自动退回谷歌翻译。</p>
+      <p class="muted">不配置也能用：默认走免费翻译（微软 / 谷歌，一个出错自动换另一个）。填上大模型 API 后，译文更通顺、术语更准确；大模型出错时会自动退回免费翻译。</p>
 
       <div class="seg engine-seg" id="engineSeg">
         <button data-v="auto">智能（推荐）</button>
         <button data-v="llm">只用大模型</button>
-        <button data-v="google">只用谷歌免费</button>
+        <button data-v="free">只用免费翻译</button>
+      </div>
+
+      <div class="row free-row">
+        <div class="label">免费翻译首选<small>首选出错时自动换另一个；微软翻译在国内通常不需要代理</small></div>
+        <select id="freeEngine">
+          <option value="microsoft">微软翻译（推荐）</option>
+          <option value="google">谷歌翻译</option>
+        </select>
       </div>
 
       <div class="grid">

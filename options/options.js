@@ -50,6 +50,12 @@ function fillEngine() {
     $('showKey').textContent = k.type === 'password' ? '显示' : '隐藏';
   });
   seg('engineSeg', settings.engine, (v) => { settings.engine = v; autosave(); });
+  $('freeEngine').value = settings.freeEngine || 'microsoft';
+  $('freeEngine').addEventListener('change', async (e) => {
+    settings.freeEngine = e.target.value;
+    autosave();
+    await chrome.runtime.sendMessage({ type: 'clearCache' });
+  });
 
   $('saveEngine').addEventListener('click', saveEngine);
 }
@@ -79,7 +85,7 @@ async function saveEngine() {
   await CST.saveSettings(settings);
   await chrome.runtime.sendMessage({ type: 'clearCache' });
 
-  if (!llm.apiKey) { r.textContent = '已保存。未填写 API Key，将使用谷歌免费翻译。'; return; }
+  if (!llm.apiKey) { r.textContent = `已保存。未填写 API Key，将使用免费翻译（${CST.FREE_ENGINES[settings.freeEngine] || '微软翻译'}优先）。`; return; }
   r.textContent = '已保存，正在测试连接…';
   $('saveEngine').disabled = true;
   try {

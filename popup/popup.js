@@ -24,8 +24,9 @@ async function command(cmd) {
 
 function renderEngine(status) {
   const el = $('engine');
-  if (!status || !status.ok) { el.textContent = '引擎：谷歌免费翻译'; return; }
-  if (status.engine === 'google') el.textContent = '引擎：谷歌免费翻译';
+  if (!status || !status.ok) { el.textContent = '引擎：免费翻译'; return; }
+  if (status.engine === 'microsoft') el.textContent = '引擎：微软翻译（免费）';
+  else if (status.engine === 'google') el.textContent = '引擎：谷歌翻译（免费）';
   else el.textContent = `引擎：${(CST.PROVIDERS[settings.llm.provider] || {}).name || '大模型'} · ${status.model}`;
   if (status.lastError && Date.now() - status.lastError.at < 10 * 60 * 1000) {
     el.textContent += '（最近出错，已自动兜底）';

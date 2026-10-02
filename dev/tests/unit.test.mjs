@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-import { parseLLMArray, parseGoogleBatch, parseGoogleSingle, chunkTexts } from '../../lib/engine-utils.js';
+import { parseLLMArray, parseGoogleBatch, parseGoogleSingle, chunkTexts, msLang, parseMicrosoft } from '../../lib/engine-utils.js';
 const require = createRequire(import.meta.url);
 const Subs = require('../../lib/subs.js');
 let n = 0; const t = (name, fn) => { fn(); n++; console.log('✓', name); };
@@ -15,6 +15,9 @@ t('谷歌单条', () => assert.equal(parseGoogleSingle([[['你好，','Hello, ']
 t('谷歌批量-字符串', () => assert.deepEqual(parseGoogleBatch(['a', 'b'], 2), ['a', 'b']));
 t('谷歌批量-二元组', () => assert.deepEqual(parseGoogleBatch([['a', 'en'], ['b', 'en']], 2), ['a', 'b']));
 t('谷歌批量-异常', () => assert.equal(parseGoogleBatch(['a', 'en'], 3), null));
+t('微软语言代码', () => { assert.equal(msLang('zh-CN'), 'zh-Hans'); assert.equal(msLang('zh-TW'), 'zh-Hant'); assert.equal(msLang('ja'), 'ja'); });
+t('微软批量返回', () => assert.deepEqual(parseMicrosoft([{ translations: [{ text: '你好', to: 'zh-Hans' }] }, { translations: [{ text: '世界', to: 'zh-Hans' }] }], 2), ['你好', '世界']));
+t('微软返回异常', () => assert.equal(parseMicrosoft([{ error: 1 }], 1), null));
 t('切分批次', () => assert.deepEqual(chunkTexts(['aa', 'bb', 'cc', 'dd'], 3, 5).map((c) => c.length), [2, 2]));
 
 // ASR 逐词字幕
