@@ -155,7 +155,11 @@
     rafId = requestAnimationFrame(render);
     if (!overlay || !video) return;
     const vid = currentVideoId();
-    const visible = settings.youtube.enabled && track && track.videoId === vid && ccOn();
+    const hasTrack = !!(track && track.videoId === vid);
+    // 直播等拿不到字幕文件的情况：改为实时读取播放器上的字幕再翻译
+    if (settings.youtube.enabled && !hasTrack && ccOn() && renderLive()) return;
+    player.classList.remove('cst-yt-live');
+    const visible = settings.youtube.enabled && hasTrack && ccOn();
     player.classList.toggle('cst-yt-on', !!visible);
     if (!visible) { if (lastIdx !== -3) { overlay.style.display = 'none'; lastIdx = -3; } return; }
 
@@ -179,6 +183,62 @@
     if (c.tr == null) pumpTranslation();
   }
 
+  // ---------- 直播字幕：实时读取播放器字幕（直播不提供字幕文件） ----------
+  const live = { text: '', stableText: '', tr: '', trFor: '', timer: 0, busy: false, pending: '' };
+
+  function readNativeCaption() {
+    const segs = player.querySelectorAll('.ytp-caption-window-container .ytp-caption-segment');
+    if (!segs.length) return '';
+    return Subs.clean([...segs].map((s) => s.textContent).join(' '));
+  }
+
+  function renderLive() {
+    const text = readNativeCaption();
+    if (!text) {
+      if (player.classList.contains('cst-yt-live') && live.text) { live.text = ''; overlay.style.display = 'none'; }
+      return player.classList.contains('cst-yt-live');
+    }
+    // 字幕本身已经是目标语言（如中文直播）：不接管，直接显示原生字幕
+    if (/^(zh|ja)/.test(settings.targetLang) && (text.match(/\p{Script=Han}/gu) || []).length > text.length * 0.4) {
+      player.classList.remove('cst-yt-live', 'cst-yt-on');
+      overlay.style.display = 'none';
+      return true;
+    }
+    player.classList.add('cst-yt-live', 'cst-yt-on');
+    lastIdx = -4;
+    if (text !== live.text) {
+      live.text = text;
+      origEl.textContent = text;
+      // 字幕停止变化约 0.6 秒，或遇到句末标点，就翻译当前这段
+      clearTimeout(live.timer);
+      const delay = /[.!?。！？]$/.test(text) ? 150 : 600;
+      live.timer = setTimeout(() => requestLiveTranslation(text), delay);
+    }
+    overlay.style.display = '';
+    overlay.classList.toggle('cst-single', !live.tr && !settings.youtube.showOriginal);
+    transEl.textContent = live.tr;
+    transEl.classList.remove('cst-wait');
+    return true;
+  }
+
+  async function requestLiveTranslation(text) {
+    if (live.busy) { live.pending = text; return; }
+    live.busy = true;
+    try {
+      const res = await chrome.runtime.sendMessage({ type: 'translate', kind: 'subtitle', texts: [text] });
+      if (res && res.ok && res.result[0]) {
+        live.tr = res.result[0];
+        live.trFor = text;
+        if (live.text === text || live.text.startsWith(text.slice(0, 20))) transEl.textContent = live.tr;
+      }
+    } catch (_) {
+    } finally {
+      live.busy = false;
+      if (live.pending && live.pending !== text) { const t = live.pending; live.pending = ''; requestLiveTranslation(t); }
+      else live.pending = '';
+    }
+  }
+
   function startLoop() {
     if (!rafId) rafId = requestAnimationFrame(render);
   }
@@ -198,6 +258,7 @@
   function onNavigate() {
     const vid = currentVideoId();
     if (track && track.videoId !== vid) { track = null; token++; lastIdx = -2; }
+    live.text = ''; live.tr = ''; live.trFor = ''; live.pending = '';
     if (vid) {
       ensureOverlay();
       let tries = 0;

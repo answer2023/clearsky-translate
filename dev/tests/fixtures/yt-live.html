@@ -1,0 +1,19 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Live test</title>
+<style>body{margin:0;background:#0f0f0f;color:#fff;font-family:Arial}
+#movie_player{position:relative;width:960px;height:540px;margin:24px;background:#1b2440;overflow:hidden}
+#movie_player video{position:absolute;inset:0;width:100%;height:100%;opacity:0}
+.ytp-caption-window-container{position:absolute;bottom:40px;width:100%;text-align:center;font-size:22px}
+.ytp-caption-segment{background:rgba(0,0,0,.75);padding:2px 6px}
+.ytp-chrome-bottom{position:absolute;bottom:0;left:0;right:0;height:40px;display:flex;justify-content:flex-end;padding:0 12px}
+.ytp-subtitles-button{background:none;border:0;color:#fff}</style></head><body>
+<div id="movie_player" class="html5-video-player ytp-autohide ytp-live">
+ <video src="/silence.wav" muted></video>
+ <div class="ytp-caption-window-container"><div class="caption-window"><span class="captions-text"></span></div></div>
+ <div class="ytp-chrome-bottom"><button class="ytp-subtitles-button" aria-pressed="true">CC</button></div>
+</div>
+<script>
+ // 模拟直播滚动字幕：一个词一个词出现，不请求 timedtext
+ const words="it is the most powerful force in personal finance.".split(' ');
+ let i=0; const box=document.querySelector('.captions-text');
+ const tick=setInterval(()=>{ i++; box.innerHTML='<span class="ytp-caption-segment">'+words.slice(0,i).join(' ')+'</span>'; if(i>=words.length) clearInterval(tick); },120);
+</script></body></html>

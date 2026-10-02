@@ -1,5 +1,7 @@
 /* ClearSky 双语翻译 — YouTube 双语字幕层 */
-#movie_player.cst-yt-on .ytp-caption-window-container { display: none !important; }
+#movie_player.cst-yt-on:not(.cst-yt-live) .ytp-caption-window-container { display: none !important; }
+/* 直播模式：原生字幕仍需在页面里更新才能读取，所以只做透明隐藏 */
+#movie_player.cst-yt-live .ytp-caption-window-container { opacity: 0 !important; pointer-events: none !important; }
 
 #cst-yt-overlay {
   position: absolute;
