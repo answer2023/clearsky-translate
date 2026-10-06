@@ -65,9 +65,19 @@
     return false;
   }
 
+  // 正文里夹着的引用/脚注小按钮（[p3]、[12]、† 之类）当作行内元素，否则整段正文会被跳过。
+  // 只认「长段落里的短标记」：带单词的按钮（订阅、展开）和图标按钮仍按块级处理，替换模式下不会被藏起来
+  function isMarkerButton(c, parent) {
+    if (c.tagName !== 'BUTTON' || c.querySelector(BLOCK_SELECTOR)) return false;
+    const t = norm(c.textContent || '');
+    if (!t || t.length > 8 || /\p{L}{3,}/u.test(t)) return false;
+    return hasDirectText(parent) && norm(parent.textContent || '').length >= 80;
+  }
+
   function hasBlockChild(el) {
     for (const c of el.children) {
       if (isOurs(c)) continue;
+      if (isMarkerButton(c, el)) continue;
       if (!INLINE_TAGS.has(c.tagName) && !SKIP_TAGS.has(c.tagName)) return true;
       if (c.querySelector && c.querySelector(BLOCK_SELECTOR)) return true;
     }
